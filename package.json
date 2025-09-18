@@ -1,0 +1,29 @@
+{
+  "name": "minecraft-server-handler-api",
+  "version": "1.0.0",
+  "description": "A simple api in express.js to handle actions for a minecraft server, such as starting/stoping it or providing data like \"players online\".",
+  "main": "./src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caio-ferreira-dev/minecraft-server-handler-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/caio-ferreira-dev/minecraft-server-handler-api/issues"
+  },
+  "homepage": "https://github.com/caio-ferreira-dev/minecraft-server-handler-api#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "minecraft-server-util": "^5.4.4"
+  },
+  "type": "module"
+}
