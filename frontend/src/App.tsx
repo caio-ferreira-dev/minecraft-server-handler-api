@@ -186,6 +186,17 @@ const App: React.FC = () => {
         {error && <div className="error-message">{error}</div>}
 
         <div className="status-section">
+          <p style={{ textAlign: "justify" }}>
+            Antes de clicar em "Iniciar" verifique se algum dos jogadores está
+            com o jogo aberto (no discord), para{" "}
+            <span style={{ color: "#f74f53" }}>evitar que dois usuários</span>{" "}
+            cliquem ao mesmo tempo no botão iniciar e{" "}
+            <span style={{ color: "#f74f53" }}>explodam</span> o nosso humilde
+            servidor e tudo que tem dentro.
+          </p>
+        </div>
+
+        <div className="status-section">
           <div className="status-header">
             <h3 className="section-title">Status do Servidor</h3>
             {isLoading ? (
