@@ -121,7 +121,12 @@ const App: React.FC = () => {
       });
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || `Erro na ação de ${action}.`);
+        if (response.status === 403) {
+          localStorage.removeItem("jwtToken");
+          setIsLoggedIn(false);
+        } else {
+          throw new Error(errorText || `Erro na ação de ${action}.`);
+        }
       }
       setTimeout(checkServerStatus, 5000);
     } catch (err: any) {
