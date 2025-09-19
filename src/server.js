@@ -89,7 +89,7 @@ app.get("/status", authenticateTokenMiddleware, async (_req, res) => {
   try {
     const status = await util.status(
       dotEnv.serverIP,
-      dotEnv.minecraftServerPort
+      +dotEnv.minecraftServerPort
     );
 
     res.status(200).json({
