@@ -1,6 +1,5 @@
 import express from "express";
 import { spawn } from "child_process";
-import util from "minecraft-server-util";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
@@ -79,33 +78,6 @@ app.post("/stop", authenticateTokenMiddleware, (_req, res) => {
   minecraftServerProcess.stdin.write("stop\n");
 
   res.status(200).send("Comando de parada enviado.");
-});
-
-app.get("/status", authenticateTokenMiddleware, async (_req, res) => {
-  if (!minecraftServerProcess) {
-    return res.status(200).json({ status: "offline" });
-  }
-
-  try {
-    const status = await util.status(
-      dotEnv.serverIP,
-      +dotEnv.minecraftServerPort
-    );
-
-    res.status(200).json({
-      status: "online",
-      onlinePlayers: status.players.online,
-      maxPlayers: status.players.max,
-      version: status.version.name,
-      motd: status.motd.clean,
-    });
-  } catch (error) {
-    console.error("Erro ao obter status do servidor:", error);
-    res.status(500).json({
-      status: "offline",
-      error: "Não foi possível se conectar ao servidor.",
-    });
-  }
 });
 
 app.listen(dotEnv.apiPort, () => {
