@@ -3,6 +3,7 @@ import { spawn } from "child_process";
 import util from "minecraft-server-util";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import "dotenv/config";
 import dotEnv from "./utils/env.js";
 import authenticateTokenMiddleware from "./middleware/auth.js";
 
@@ -25,9 +26,13 @@ app.post("/login", async (req, res) => {
       return res.status(401).send("Credenciais inválidas.");
     }
 
-    const token = jwt.sign({ username: user.username }, dotEnv.jwtSecret, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { username: user.username },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
     res.status(200).json({ token });
   } catch (error) {
     console.error("Erro no login:", error);
