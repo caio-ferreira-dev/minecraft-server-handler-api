@@ -7,6 +7,7 @@ const dotEnv = {
   maxRAM: process.env.MAX_RAM || "16",
   serverJarFilePath: process.env.SERVER_JAR_FILE_PATH,
   serverIP: process.env.SERVER_IP || "localhost",
+  serverFolderPath: process.env.SERVER_FOLDER_PATH,
   users: [
     {
       username: process.env.USER_1_USERNAME,
