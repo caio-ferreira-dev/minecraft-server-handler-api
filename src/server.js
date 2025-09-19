@@ -46,13 +46,7 @@ app.post("/start", authenticateTokenMiddleware, (_req, res) => {
       .send("O caminho do arquivo do servidor não está configurado.");
   }
 
-  minecraftServerProcess = spawn("java", [
-    `-Xms${dotEnv.minRAM}G`,
-    `-Xmx${dotEnv.maxRAM}G`,
-    "-jar",
-    dotEnv.serverJarFilePath,
-    "nogui",
-  ]);
+  minecraftServerProcess = spawn(serverJarFilePath);
 
   minecraftServerProcess.stdout.on("data", (data) => {
     console.log(`Minecraft Server: ${data}`);
