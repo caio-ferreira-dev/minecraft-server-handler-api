@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { spawn } from "child_process";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -7,6 +8,8 @@ import dotEnv from "./utils/env.js";
 import authenticateTokenMiddleware from "./middleware/auth.js";
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 let minecraftServerProcess = null;
