@@ -68,6 +68,65 @@ export const actions: Actions = {
     cookies.delete("jwtToken", { path: "/" });
     throw redirect(303, "/");
   },
+  start: async ({ cookies }) => {
+    const token = cookies.get("jwtToken");
+    if (!token) {
+      throw new Error("Token de autenticação não encontrado.");
+    }
+    const response = await fetch(`${API_BASE_URL}/start`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      if (response.status === 403) {
+        cookies.delete("jwtToken", { path: "/" });
+        throw redirect(303, "/");
+      } else {
+        throw new Error(errorText || `Erro ao iniciar o servidor.`);
+      }
+    }
+    return { success: true, message: await response.text(), action: "start" };
+  },
+  stop: async ({ cookies }) => {
+    const token = cookies.get("jwtToken");
+    if (!token) {
+      throw new Error("Token de autenticação não encontrado.");
+    }
+    const response = await fetch(`${API_BASE_URL}/stop`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      if (response.status === 403) {
+        cookies.delete("jwtToken", { path: "/" });
+        throw redirect(303, "/");
+      } else {
+        return {
+          error: true,
+          message: (await response.text()) || `Erro ao parar o servidor.`,
+          action: "stop",
+        };
+      }
+    }
+    return { success: true, message: await response.text(), action: "stop" };
+  },
+  backup: async ({ cookies }) => {
+    const token = cookies.get("jwtToken");
+    if (!token) {
+      throw new Error("Token de autenticação não encontrado.");
+    }
+
+    return {
+      success: true,
+      message: "Funcionalidade não implementada",
+      action: "backup",
+    };
+  },
 };
 
 export async function load({ cookies }) {

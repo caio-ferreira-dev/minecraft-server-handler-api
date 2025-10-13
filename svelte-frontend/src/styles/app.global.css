@@ -5,6 +5,7 @@
   margin: 0;
   padding: 0;
   color: #ffffff;
+  box-sizing: border-box;
 }
 
 .title {
@@ -17,4 +18,18 @@
 
 .common-text {
   font-size: 14px;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+p {
+  font-size: 14px;
+  color: #b9bbbe;
 }
