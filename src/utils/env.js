@@ -6,7 +6,7 @@ const dotEnv = {
   minRAM: process.env.MIN_RAM || "6",
   maxRAM: process.env.MAX_RAM || "16",
   serverJarFilePath: process.env.SERVER_JAR_FILE_PATH,
-  serverIP: process.env.SERVER_IP || "localhost",
+  minecraftServerIP: process.env.MINECRAFT_SERVER_IP || "localhost",
   serverFolderPath: process.env.SERVER_FOLDER_PATH,
   users: [
     {
