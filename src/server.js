@@ -14,7 +14,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: dotEnv.minecraftServerIP, // IP do frontend (altere caso necessário)
+    origin: "http://localhost:5173", // IP do frontend (altere caso necessário)
     methods: ["GET", "POST"],
   },
 });
@@ -96,36 +96,53 @@ app.post("/stop", authenticateTokenMiddleware, (_req, res) => {
 
 app.get("/status", async (_req, res) => {
   try {
-    const serverInfos = await queryFull(
-      dotEnv.minecraftServerIP,
-      +dotEnv.minecraftServerPort
-    );
-
-    const simplifiedServerInfos = {
-      online: true,
-      players: serverInfos.players.list,
-      maxPlayers: serverInfos.players.max,
-    };
-
-    res.status(200).json(simplifiedServerInfos);
+    const infos = await getInfos();
+    res.status(200).json(infos);
   } catch (error) {
     console.log(error);
     res.status(200).send("Servidor offline");
   }
 });
 
-async function checkAndEmitStatus() {
-  try {
-    const serverInfos = await queryFull(
-      dotEnv.minecraftServerIP,
-      +dotEnv.minecraftServerPort
+async function getInfos() {
+  const serverInfos = await queryFull(
+    dotEnv.minecraftServerIP,
+    +dotEnv.minecraftServerPort
+  );
+
+  const playersPromises = serverInfos.players.list.map(async (playerName) => {
+    const uuidResponse = await fetch(
+      `https://api.minecraftservices.com/minecraft/profile/lookup/name/${playerName}`,
+      { method: "GET" }
     );
 
-    const simplifiedServerInfos = {
-      online: true,
-      players: serverInfos.players.list,
-      maxPlayers: serverInfos.players.max,
+    if (!uuidResponse.ok) {
+      console.error(`Falha ao buscar UUID para ${playerName}`);
+      return { playerName, playerPictureURL: null };
+    }
+    const uuidData = await uuidResponse.json();
+    const playerUUID = uuidData.id;
+
+    const playerPictureURL = `https://crafatar.com/avatars/${playerUUID}?size=32&overlay`;
+
+    return {
+      playerName,
+      playerPictureURL,
     };
+  });
+
+  const resolvedPlayers = await Promise.all(playersPromises);
+
+  return {
+    online: true,
+    players: resolvedPlayers,
+    maxPlayers: serverInfos.players.max,
+  };
+}
+
+async function checkAndEmitStatus() {
+  try {
+    const simplifiedServerInfos = await getInfos();
 
     // Verifica se o status mudou (principalmente o número de jogadores)
     if (
@@ -135,6 +152,7 @@ async function checkAndEmitStatus() {
       console.log(
         `Status atualizado. Jogadores: ${simplifiedServerInfos.players.length}`
       );
+
       io.emit("server_status", simplifiedServerInfos); // Envia a atualização via WebSocket
       lastServerInfos = simplifiedServerInfos;
     }
