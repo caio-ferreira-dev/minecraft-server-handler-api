@@ -9,8 +9,7 @@
   // Toast
   $: if (form?.success) {
     (async () => {
-      const message =
-        form.message instanceof Promise ? await form.message : form.message;
+      const message = await Promise.resolve(form.message);
       message === "Funcionalidade não implementada"
         ? addToast(message, "info")
         : addToast(message, "success");

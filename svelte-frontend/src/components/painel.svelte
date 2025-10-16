@@ -1,12 +1,17 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { io, type Socket } from "socket.io-client";
+  import { addToast } from "$lib/stores/toast";
 
   const API_URL = "http://localhost:4444";
 
   let online: boolean = $state(false);
   let players: { playerName: string; playerPictureURL: string }[] = $state([]);
   let onlinePlayers: string = $state(`0/0`);
+  let serverResources: { resource: string; value: string }[] = $state([
+    { resource: "CPU", value: "80%" },
+    { resource: "RAM", value: "40%" },
+  ]);
 
   let socket: Socket;
 
@@ -20,11 +25,15 @@
     const responseText = await response.text();
     const serverInfos = JSON.parse(responseText);
 
-    online = serverInfos.online;
-    onlinePlayers = `${serverInfos.players.length}/${serverInfos.maxPlayers}`;
+    if (!serverInfos.message) {
+      online = serverInfos.online;
+      onlinePlayers = `${serverInfos.players.length}/${serverInfos.maxPlayers}`;
 
-    if (serverInfos.players.length > 0) {
-      players = serverInfos.players;
+      if (serverInfos.players.length > 0) {
+        players = serverInfos.players;
+      }
+    } else {
+      addToast(serverInfos.message, "error");
     }
 
     socket = io(API_URL);
@@ -35,22 +44,17 @@
       online = data.online;
       onlinePlayers = `${data.players.length}/${data.maxPlayers}`;
 
-      // ⚠️ Os dados do Query Protocol fornecem a lista de nomes.
-      // Se 'data.list' (nomes dos jogadores) estiver disponível, use-o.
       if (data.players && Array.isArray(data.players)) {
-        // Mapeia a lista de nomes para o formato do seu objeto 'players'
-        players = serverInfos.players;
+        players = data.players;
       } else {
         players = [];
       }
+    });
 
-      // 💡 Se você estiver enviando dados de recursos:
-      // if (data.cpuUsage) {
-      //     serverResources[0].value = `${data.cpuUsage}%`;
-      // }
-      // if (data.ramUsage) {
-      //     serverResources[1].value = `${data.ramUsage}%`;
-      // }
+    socket.on("server_resources", (data) => {
+      console.log(data);
+
+      serverResources = data;
     });
 
     socket.on("disconnect", () => {
@@ -64,11 +68,6 @@
       socket.disconnect();
     }
   });
-
-  let serverResources = [
-    { resource: "CPU", value: "80%" },
-    { resource: "RAM", value: "40%" },
-  ];
 </script>
 
 <div class="container">

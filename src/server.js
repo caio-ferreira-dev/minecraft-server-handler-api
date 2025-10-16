@@ -9,6 +9,7 @@ import authenticateTokenMiddleware from "./middleware/auth.js";
 import { queryFull } from "minecraft-server-util";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { currentLoad, mem } from "systeminformation";
 
 const app = express();
 const httpServer = createServer(app);
@@ -100,7 +101,7 @@ app.get("/status", async (_req, res) => {
     res.status(200).json(infos);
   } catch (error) {
     console.log(error);
-    res.status(200).send("Servidor offline");
+    res.status(200).json({ message: "Servidor offline" });
   }
 });
 
@@ -140,11 +141,30 @@ async function getInfos() {
   };
 }
 
+async function getSystemMetrics() {
+  try {
+    const memData = await mem();
+    const ramUsage = (1 - memData.available / memData.total) * 100;
+
+    const cpuData = await currentLoad();
+    const cpuUsage = cpuData.currentLoad;
+
+    const metrics = [
+      { resource: "CPU", value: `${cpuUsage.toFixed(2)}%` },
+      { resource: "RAM", value: `${ramUsage.toFixed(2)}%` },
+    ];
+
+    return metrics;
+  } catch (e) {
+    console.error("Erro ao obter métricas do sistema:", e);
+    return [];
+  }
+}
+
 async function checkAndEmitStatus() {
   try {
     const simplifiedServerInfos = await getInfos();
 
-    // Verifica se o status mudou (principalmente o número de jogadores)
     if (
       !lastServerInfos ||
       lastServerInfos.players.length !== simplifiedServerInfos.players.length
@@ -153,11 +173,10 @@ async function checkAndEmitStatus() {
         `Status atualizado. Jogadores: ${simplifiedServerInfos.players.length}`
       );
 
-      io.emit("server_status", simplifiedServerInfos); // Envia a atualização via WebSocket
+      io.emit("server_status", simplifiedServerInfos);
       lastServerInfos = simplifiedServerInfos;
     }
   } catch (error) {
-    // Trata a desconexão e avisa o frontend
     if (lastServerInfos && lastServerInfos.online) {
       console.log("Servidor caiu.");
       io.emit("server_status", {
@@ -171,9 +190,34 @@ async function checkAndEmitStatus() {
   }
 }
 
-const POLLING_INTERVAL = 5000;
-setInterval(checkAndEmitStatus, POLLING_INTERVAL);
+async function checkAndEmitResources() {
+  try {
+    const resources = await getSystemMetrics();
+
+    console.log(
+      `${resources[0].resource}: ${resources[0].value}, ${resources[1].resource}: ${resources[1].value}`
+    );
+
+    io.emit("server_resources", resources);
+  } catch (error) {
+    if (lastServerInfos && lastServerInfos.online) {
+      console.log("Erro:");
+      console.log(error);
+
+      io.emit("server_resources", [
+        { resource: "CPU", value: "0%" },
+        { resource: "RAM", value: "0%" },
+      ]);
+    }
+  }
+}
+
+const POLLING_INTERVAL_STATUS = 1000;
+setInterval(checkAndEmitStatus, POLLING_INTERVAL_STATUS);
 checkAndEmitStatus();
+
+const POLLING_INTERVAL_RESOURCES = 750;
+setInterval(checkAndEmitResources, POLLING_INTERVAL_RESOURCES);
 
 httpServer.listen(dotEnv.apiPort, () => {
   console.log(
