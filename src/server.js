@@ -241,10 +241,6 @@ async function checkAndEmitResources() {
   try {
     const resources = await getSystemMetrics();
 
-    console.log(
-      `${resources[0].resource}: ${resources[0].value}, ${resources[1].resource}: ${resources[1].value}`
-    );
-
     io.emit("server_resources", resources);
   } catch (error) {
     if (lastServerInfos && lastServerInfos.online) {
