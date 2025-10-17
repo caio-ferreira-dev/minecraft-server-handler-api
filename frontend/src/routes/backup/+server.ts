@@ -1,5 +1,5 @@
 import { error } from "@sveltejs/kit";
-import { API_BASE_URL } from "$env/static/private";
+import { PUBLIC_API_BASE_URL } from "$env/static/public";
 
 export async function POST({ request, cookies }) {
   const token = cookies.get("jwtToken");
@@ -9,7 +9,7 @@ export async function POST({ request, cookies }) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/backup`, {
+    const response = await fetch(`${PUBLIC_API_BASE_URL}/backup`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

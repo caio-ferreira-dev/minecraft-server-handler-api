@@ -1,6 +1,6 @@
 import type { Actions } from "./$types";
 import { fail, redirect } from "@sveltejs/kit";
-import { API_BASE_URL } from "$env/static/private";
+import { PUBLIC_API_BASE_URL } from "$env/static/public";
 
 export const actions: Actions = {
   login: async ({ request, cookies }) => {
@@ -13,7 +13,7 @@ export const actions: Actions = {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: user, password: pass }),
@@ -72,7 +72,7 @@ export const actions: Actions = {
     if (!token) {
       throw new Error("Token de autenticação não encontrado.");
     }
-    const response = await fetch(`${API_BASE_URL}/start`, {
+    const response = await fetch(`${PUBLIC_API_BASE_URL}/start`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -94,7 +94,7 @@ export const actions: Actions = {
     if (!token) {
       throw new Error("Token de autenticação não encontrado.");
     }
-    const response = await fetch(`${API_BASE_URL}/stop`, {
+    const response = await fetch(`${PUBLIC_API_BASE_URL}/stop`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

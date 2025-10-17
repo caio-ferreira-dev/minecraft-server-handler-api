@@ -2,8 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { io, type Socket } from "socket.io-client";
   import { addToast } from "$lib/stores/toast";
-
-  const API_URL = "http://localhost:4444";
+  import { PUBLIC_API_BASE_URL } from "$env/static/public";
 
   let online: boolean = $state(false);
   let players: { playerName: string; playerPictureURL: string }[] = $state([]);
@@ -17,7 +16,7 @@
 
   // Função para estabelecer a conexão e ouvir eventos
   onMount(async () => {
-    const response = await fetch(`${API_URL}/status`, {
+    const response = await fetch(`${PUBLIC_API_BASE_URL}/status`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
@@ -36,7 +35,7 @@
       addToast(serverInfos.message, "error");
     }
 
-    socket = io(API_URL);
+    socket = io(PUBLIC_API_BASE_URL);
 
     socket.on("server_status", (data) => {
       console.log("Dados recebidos via WebSocket:", data);
