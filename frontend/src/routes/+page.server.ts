@@ -63,7 +63,6 @@ export const actions: Actions = {
       return fail(500, { user, error: "Ocorreu um erro interno no servidor." });
     }
   },
-
   logout: async ({ cookies }) => {
     cookies.delete("jwtToken", { path: "/" });
     throw redirect(303, "/");
@@ -114,18 +113,6 @@ export const actions: Actions = {
       }
     }
     return { success: true, message: await response.text(), action: "stop" };
-  },
-  backup: async ({ cookies }) => {
-    const token = cookies.get("jwtToken");
-    if (!token) {
-      throw new Error("Token de autenticação não encontrado.");
-    }
-
-    return {
-      success: true,
-      message: "Funcionalidade não implementada",
-      action: "backup",
-    };
   },
 };
 

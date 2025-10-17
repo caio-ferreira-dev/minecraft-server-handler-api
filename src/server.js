@@ -10,21 +10,29 @@ import { queryFull } from "minecraft-server-util";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { currentLoad, mem } from "systeminformation";
+import archiver from "archiver";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173", // IP do frontend (altere caso necessário)
+    origin: dotEnv.frontendIP,
     methods: ["GET", "POST"],
   },
 });
-
 app.use(cors());
 app.use(express.json());
 
 let minecraftServerProcess = null;
 let lastServerInfos = null;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const FOLDER_TO_ZIP = path.join(__dirname, dotEnv.backupFolderPath);
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -103,6 +111,45 @@ app.get("/status", async (_req, res) => {
     console.log(error);
     res.status(200).json({ message: "Servidor offline" });
   }
+});
+
+app.get("/backup", async (_req, res) => {
+  const archive = archiver("zip", {
+    zlib: { level: 9 },
+  });
+
+  const now = new Date();
+
+  res.attachment(`backup ${now.toISOString()}.zip`);
+
+  archive.pipe(res);
+
+  if (!fs.existsSync(FOLDER_TO_ZIP)) {
+    return res.status(404).send("Pasta de backup não encontrada.");
+  }
+
+  try {
+    const files = fs.readdirSync(FOLDER_TO_ZIP);
+    console.log(`Conteúdo da pasta ${FOLDER_TO_ZIP}:`, files);
+  } catch (e) {
+    console.error("Erro ao ler o diretório:", e);
+  }
+  // 4. Adiciona a pasta ao arquivo compactado
+  archive.directory(FOLDER_TO_ZIP, "compactada");
+
+  // 5. Finaliza o arquivo (isso faz o stream fechar e enviar a resposta)
+  archive.finalize();
+
+  // Opcional: Tratamento de erros
+  archive.on("error", (err) => {
+    console.error("Erro ao compactar:", err);
+    res.status(500).send("Erro interno do servidor ao compactar a pasta.");
+  });
+
+  // Opcional: Escuta o evento de finalização para logs
+  archive.on("finish", () => {
+    console.log("Pasta compactada e enviada com sucesso.");
+  });
 });
 
 async function getInfos() {

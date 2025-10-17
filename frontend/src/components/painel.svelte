@@ -110,13 +110,18 @@
       <h1>Ações</h1>
       <div class="action-buttons">
         <form method="POST" action="?/start">
-          <button class="start">Iniciar</button>
+          <button class="start" type="submit">Iniciar</button>
         </form>
         <form method="POST" action="?/stop">
-          <button class="stop">Parar</button>
+          <button class="stop" type="submit">Parar</button>
         </form>
-        <form method="POST" action="?/backup">
-          <button class="backup">Backup</button>
+        <form
+          method="POST"
+          action="/backup"
+          data-sveltekit-reload
+          data-sveltekit-noscroll
+        >
+          <button class="backup" type="submit">Backup</button>
         </form>
       </div>
     </div>
