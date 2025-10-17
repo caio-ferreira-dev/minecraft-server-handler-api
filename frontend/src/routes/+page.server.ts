@@ -51,7 +51,7 @@ export const actions: Actions = {
       cookies.set("jwtToken", loginData.token, {
         path: "/",
         httpOnly: true, // Impedir acesso via JavaScript no navegador
-        secure: true, // Apenas HTTPS
+        secure: false, // Apenas HTTPS
         sameSite: "strict",
         maxAge: 60 * 60 * 24 * 7 * 8, // 8 semanas
       });
